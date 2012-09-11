@@ -3,14 +3,16 @@ package eu.piotrbuda.twittory.signin;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
+import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.net.URI;
 
 /**
@@ -21,7 +23,7 @@ public class TwitterSignInResource {
 
     @GET
     @Path("signin")
-    public void signIn(@Context HttpServletRequest request, @Context HttpServletResponse response) {
+    public Response signIn(@Context HttpServletRequest request) {
         Twitter twitter = new TwitterFactory().getInstance();
         twitter.setOAuthConsumer(System.getenv("twitter4j.oauth.consumerKey"), System.getenv("twitter4j.oauth.consumerSecret"));
         String requestUrl = request.getRequestURL().toString();
@@ -31,20 +33,29 @@ public class TwitterSignInResource {
         try {
             RequestToken requestToken = twitter.getOAuthRequestToken(callback);
             request.getSession(true).setAttribute("requestToken", requestToken);
-            response.sendRedirect(requestToken.getAuthenticationURL());
+            return Response.status(302).location(URI.create(requestToken.getAuthenticationURL())).build();
         } catch (TwitterException e) {
-            throw new WebApplicationException(e);
-        } catch (IOException e) {
             throw new WebApplicationException(e);
         }
     }
 
     @GET
     @Path("callback")
-    public Response twitterCallback(@QueryParam("oauth_token") String oauth_token,
-                                    @QueryParam("oauth_verifier") String oauth_verifier) {
+    public Response callback(@Context HttpServletRequest request,
+                             @QueryParam("oauth_token") String oauth_token,
+                             @QueryParam("oauth_verifier") String oauth_verifier) {
         Twitter twitter = new TwitterFactory().getInstance();
         twitter.setOAuthConsumer(System.getenv("twitter4j.oauth.consumerKey"), System.getenv("twitter4j.oauth.consumerSecret"));
-        return Response.seeOther(URI.create("../twittory.html")).build();
+        RequestToken requestToken = (RequestToken) request.getSession().getAttribute("requestToken");
+        try {
+            AccessToken accessToken = twitter.getOAuthAccessToken(requestToken, oauth_verifier);
+            storeAccessToken(accessToken);
+            return Response.seeOther(URI.create("../twittory.html")).build();
+        } catch (TwitterException e) {
+            throw new WebApplicationException(e);
+        }
+    }
+
+    private void storeAccessToken(AccessToken accessToken) {
     }
 }
