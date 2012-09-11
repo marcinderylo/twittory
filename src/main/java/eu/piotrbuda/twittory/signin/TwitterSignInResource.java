@@ -6,11 +6,11 @@ import twitter4j.TwitterFactory;
 import twitter4j.auth.RequestToken;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.WebApplicationException;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.net.URI;
 
 /**
@@ -21,16 +21,30 @@ public class TwitterSignInResource {
 
     @GET
     @Path("signin")
-    public Response signIn(@Context HttpServletRequest request) {
+    public void signIn(@Context HttpServletRequest request, @Context HttpServletResponse response) {
         Twitter twitter = new TwitterFactory().getInstance();
         twitter.setOAuthConsumer(System.getenv("twitter4j.oauth.consumerKey"), System.getenv("twitter4j.oauth.consumerSecret"));
-        String callback = "http://localhost:8080/twitter/callback";
+        String requestUrl = request.getRequestURL().toString();
+        String requestUri = request.getRequestURI();
+        String server = requestUrl.substring(0, requestUrl.indexOf(requestUri));
+        String callback = server + "/api/twitter/callback";
         try {
             RequestToken requestToken = twitter.getOAuthRequestToken(callback);
             request.getSession(true).setAttribute("requestToken", requestToken);
-            return Response.seeOther(URI.create(requestToken.getAuthenticationURL())).build();
+            response.sendRedirect(requestToken.getAuthenticationURL());
         } catch (TwitterException e) {
             throw new WebApplicationException(e);
+        } catch (IOException e) {
+            throw new WebApplicationException(e);
         }
+    }
+
+    @GET
+    @Path("callback")
+    public Response twitterCallback(@QueryParam("oauth_token") String oauth_token,
+                                    @QueryParam("oauth_verifier") String oauth_verifier) {
+        Twitter twitter = new TwitterFactory().getInstance();
+        twitter.setOAuthConsumer(System.getenv("twitter4j.oauth.consumerKey"), System.getenv("twitter4j.oauth.consumerSecret"));
+        return Response.seeOther(URI.create("../twittory.html")).build();
     }
 }
