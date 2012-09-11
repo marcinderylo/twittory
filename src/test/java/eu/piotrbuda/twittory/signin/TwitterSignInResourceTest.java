@@ -8,6 +8,7 @@ import javax.ws.rs.core.Response;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * .
@@ -21,6 +22,8 @@ public class TwitterSignInResourceTest extends JerseyTest {
     public void signin_should_redirect_to_twitter() throws Exception {
         ClientResponse clientResponse = resource().path("/twitter/signin").get(ClientResponse.class);
         assertNotNull(clientResponse);
-        assertEquals(ClientResponse.Status.SEE_OTHER, clientResponse.getClientResponseStatus());
+        assertEquals(ClientResponse.Status.OK, clientResponse.getClientResponseStatus());
+        String expectedTwitterUrl = "http://api.twitter.com/oauth/authenticate?oauth_token=";
+        assertTrue(clientResponse.toString().contains(expectedTwitterUrl));
     }
 }
