@@ -9,8 +9,8 @@ import static org.junit.Assert.*;
 /**
  * .
  */
-public class TwitterSignInResourceTest extends JerseyTest {
-    public TwitterSignInResourceTest() {
+public class TwitterSignInResourceIntegrationTest extends JerseyTest {
+    public TwitterSignInResourceIntegrationTest() {
         super("eu.piotrbuda.twittory");
     }
 
