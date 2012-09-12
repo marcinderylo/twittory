@@ -1,8 +1,11 @@
 package eu.piotrbuda.twittory.signin;
 
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.spi.spring.container.servlet.SpringServlet;
 import com.sun.jersey.test.framework.JerseyTest;
+import com.sun.jersey.test.framework.WebAppDescriptor;
 import org.junit.Test;
+import org.springframework.web.context.ContextLoaderListener;
 
 import static org.junit.Assert.*;
 
@@ -11,7 +14,11 @@ import static org.junit.Assert.*;
  */
 public class TwitterSignInResourceIntegrationTest extends JerseyTest {
     public TwitterSignInResourceIntegrationTest() {
-        super("eu.piotrbuda.twittory");
+        super(new WebAppDescriptor.Builder("eu.piotrbuda.twittory.signin")
+                .contextParam("contextConfigLocation", "classpath:applicationContext_test.xml")
+                .servletClass(SpringServlet.class)
+                .contextListenerClass(ContextLoaderListener.class)
+                .build());
     }
 
     @Test

@@ -1,11 +1,12 @@
 package eu.piotrbuda.twittory.signin;
 
-import com.google.inject.Inject;
+import org.springframework.stereotype.Component;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -19,6 +20,7 @@ import java.net.URI;
  * .
  */
 @Path("/twitter")
+@Component
 public class TwitterSignInResource {
 
     @GET
@@ -55,9 +57,10 @@ public class TwitterSignInResource {
     private void storeAccessToken(AccessToken accessToken) {
     }
 
+
     private Twitter twitter;
 
-    @Inject
+    @Resource
     public void setTwitter(Twitter twitter) {
         this.twitter = twitter;
     }
