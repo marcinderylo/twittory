@@ -45,6 +45,9 @@ public class TwitterSignInResource {
                              @QueryParam("oauth_token") String oauth_token,
                              @QueryParam("oauth_verifier") String oauth_verifier) {
         RequestToken requestToken = (RequestToken) request.getSession().getAttribute("requestToken");
+        if(requestToken == null) {
+            throw new WebApplicationException(400);
+        }
         try {
             AccessToken accessToken = twitter.getOAuthAccessToken(requestToken, oauth_verifier);
             storeAccessToken(accessToken);
