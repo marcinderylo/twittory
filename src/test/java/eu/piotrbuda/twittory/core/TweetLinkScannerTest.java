@@ -8,7 +8,8 @@ import twitter4j.ResponseList;
 import twitter4j.Status;
 import twitter4j.Twitter;
 
-import java.util.Iterator;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -38,8 +39,7 @@ public class TweetLinkScannerTest {
     @Test
     public void returns_initialized_empty_list_no_links() throws Exception {
         ResponseList<Status> mockResponse = mock(ResponseList.class);
-        Iterator mockIterator = mock(Iterator.class);
-        when(mockResponse.iterator()).thenReturn(mockIterator);
+        when(mockResponse.iterator()).thenReturn(Collections.EMPTY_LIST.iterator());
         when(twitter.getHomeTimeline()).thenReturn(mockResponse);
         List<LinkDetails> scan = scanner.scan();
         assertNotNull(scan);
@@ -52,11 +52,8 @@ public class TweetLinkScannerTest {
         Status status2 = prepareStatus("Text with link http://www.onet.pl in it");
         Status status3 = prepareStatus("Status 3");
         ResponseList<Status> mockResponse = mock(ResponseList.class);
-        Iterator mockIterator = mock(Iterator.class);
 
-        when(mockIterator.hasNext()).thenReturn(true).thenReturn(true).thenReturn(true).thenReturn(false);
-        when(mockIterator.next()).thenReturn(status1).thenReturn(status2).thenReturn(status3);
-        when(mockResponse.iterator()).thenReturn(mockIterator);
+        when(mockResponse.iterator()).thenReturn(Arrays.asList(status1, status2, status3).iterator());
         when(twitter.getHomeTimeline()).thenReturn(mockResponse);
 
         List<LinkDetails> scan = scanner.scan();
