@@ -1,6 +1,8 @@
 package eu.piotrbuda.twittory.core;
 
 import eu.piotrbuda.twittory.core.model.LinkDetails;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import twitter4j.ResponseList;
 import twitter4j.Status;
 import twitter4j.Twitter;
@@ -12,9 +14,11 @@ import java.util.List;
 /**
  * .
  */
+@Component
 public class TweetLinkScanner {
     private Twitter twitter;
 
+    @Autowired
     public TweetLinkScanner(Twitter twitter) {
         this.twitter = twitter;
     }
