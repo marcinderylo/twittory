@@ -12,7 +12,7 @@ import java.util.List;
  * .
  */
 @Component
-@Path("/twittory")
+@Path("/eu/piotrbuda/twittory")
 public class TwittoryResource {
 
     public List<LinkDetails> getLatestLinks() {

@@ -10,9 +10,8 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>webapp</artifactId>
-    <packaging>war</packaging>
-    <name>Twittory Web Application</name>
+    <artifactId>integration-tests</artifactId>
+    <name>Twittory integration tests</name>
 
     <dependencies>
         <dependency>
@@ -21,4 +20,5 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
+
 </project>
