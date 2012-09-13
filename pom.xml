@@ -7,7 +7,8 @@
     <groupId>eu.piotrbuda.twittory</groupId>
     <artifactId>twittory</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>war</packaging>
+
+    <packaging>pom</packaging>
 
     <name>Twittory</name>
     <description>Link repository built from Your Twitter timeline</description>
@@ -49,6 +50,10 @@
         <connection>scm:git:git://github.com/pbuda/twittory.git</connection>
         <developerConnection>scm:git:git@github.com:pbuda/twittory.git</developerConnection>
     </scm>
+
+    <modules>
+        <module>webapp</module>
+    </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
