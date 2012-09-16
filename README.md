@@ -9,3 +9,7 @@ Currently in order for Twittory to work You have to set two environment variable
 
 * twitter4j.oauth.consumerKey
 * twitter4j.oauth.consumerSecret
+
+Furthermore, Twittory uses MongoDB as it's storage.
+
+To run integration tests an instance of MongoDB on localhost:27017 must be present.
