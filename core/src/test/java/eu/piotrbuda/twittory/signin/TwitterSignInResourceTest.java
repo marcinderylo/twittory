@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.WebApplicationException;
 
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 /**
@@ -64,7 +65,9 @@ public class TwitterSignInResourceTest {
 
     @Test
     public void token_is_obtained() throws Exception {
+        AccessToken accessToken = new AccessToken("1-token", "secret");
         when(session.getAttribute("requestToken")).thenReturn(new RequestToken(oauth_token, oauth_secret));
+        when(twitter.getOAuthAccessToken(any(RequestToken.class), anyString())).thenReturn(accessToken);
 
         resource.callback(request, oauth_token, oauth_verifier);
 
@@ -82,5 +85,8 @@ public class TwitterSignInResourceTest {
         verify(storage).storeAccessToken(accessToken);
     }
 
-
+    @Test
+    public void access_token_key_is_stored_in_cookie() throws Exception {
+        fail("Pending...");
+    }
 }
