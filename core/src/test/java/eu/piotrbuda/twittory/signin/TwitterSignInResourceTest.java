@@ -9,18 +9,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import twitter4j.Twitter;
-import twitter4j.TwitterException;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import java.util.List;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 /**
@@ -87,41 +82,5 @@ public class TwitterSignInResourceTest {
         verify(storage).storeAccessToken(accessToken);
     }
 
-    @Test
-    public void when_access_token_is_already_available_should_redirect_to_twittory() throws Exception {
-        whenAccessTokenIsAlreadyAvailable();
-        Response response = resource.signIn(request);
-        assertThatResponse(response).isRedirect();
-        assertThatResponse(response).redirectsTo("twittory.html");
-    }
 
-    private void whenAccessTokenIsAlreadyAvailable() throws TwitterException {
-        when(request.getRequestURL()).thenReturn(new StringBuffer("uri"));
-        when(request.getRequestURI()).thenReturn("uri");
-        when(request.getSession(true)).thenReturn(session);
-        //getOAuthRequestToken throws IllegalStateException when access token is already available
-        when(twitter.getOAuthRequestToken(anyString())).thenThrow(IllegalStateException.class);
-    }
-
-    private ResponseAssertion assertThatResponse(Response response) {
-        return new ResponseAssertion(response);
-    }
-
-    private class ResponseAssertion {
-        private Response response;
-
-        public ResponseAssertion(Response response) {
-            this.response = response;
-        }
-
-        public void isRedirect() {
-            assertEquals(Response.Status.SEE_OTHER.getStatusCode(), response.getStatus());
-        }
-
-        public void redirectsTo(String url) {
-            assertTrue(response.getMetadata().containsKey("Location"));
-            List<Object> location = response.getMetadata().get("Location");
-            assertTrue(location.get(0).toString().contains(url));
-        }
-    }
 }
