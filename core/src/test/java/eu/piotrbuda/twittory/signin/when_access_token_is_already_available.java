@@ -19,7 +19,6 @@ import java.util.List;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -41,7 +40,7 @@ public class when_access_token_is_already_available {
     private AccessTokenStorage storage;
 
     @Mock
-    private HttpSession session = mock(HttpSession.class);
+    private HttpSession session;
 
     @Before
     public void setUp() throws Exception {
