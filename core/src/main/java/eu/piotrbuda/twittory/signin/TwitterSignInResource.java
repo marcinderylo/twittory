@@ -30,7 +30,7 @@ public class TwitterSignInResource {
     @Path("signin")
     public Response signIn(@Context HttpServletRequest request) {
         for (Cookie cookie : request.getCookies()) {
-            if (cookie.getName().equals("authtoken")) {
+            if (cookie.getName().equals("accesstoken")) {
                 return redirectToTwittoryMainPage();
             }
         }

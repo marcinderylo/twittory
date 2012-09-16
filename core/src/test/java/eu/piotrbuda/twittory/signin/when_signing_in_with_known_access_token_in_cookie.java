@@ -11,9 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
+import static junit.framework.Assert.*;
 import static org.mockito.Mockito.when;
 
 /**
@@ -25,7 +23,7 @@ public class when_signing_in_with_known_access_token_in_cookie {
     private TwitterSignInResource resource;
 
     @Mock
-    private HttpServletRequest request = mock(HttpServletRequest.class);
+    private HttpServletRequest request;
 
     @Test
     public void then_user_is_redirected_to_twittory_main_page() {
@@ -39,6 +37,7 @@ public class when_signing_in_with_known_access_token_in_cookie {
     }
 
     private void andKnownAccessTokenSecret() {
+        fail("Accessing access tokens is not possible at the moment");
     }
 
     private void userIsRedirectedToTwittory() {

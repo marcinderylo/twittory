@@ -11,8 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -39,12 +38,13 @@ public class when_signing_in_with_unknown_access_token_in_cookie {
     }
 
     private void andUnknownAccessTokenSecret() {
+        fail("Accessing access tokens is not possible at the moment");
     }
 
     private void userIsRedirectedToTwitterForAuthentication() {
         Response response = resource.signIn(request);
         assertThatResponse(response).isRedirect();
-        assertThatResponse(response).redirectsTo("https://dev.twitter.com/oauth/authorize");
+        assertThatResponse(response).redirectsTo("http://api.twitter.com/oauth/authenticate?oauth_token=");
     }
 
     private ResponseAssertion assertThatResponse(Response response) {
