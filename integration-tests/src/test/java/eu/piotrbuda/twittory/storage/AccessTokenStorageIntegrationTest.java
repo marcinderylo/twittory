@@ -40,22 +40,32 @@ public class AccessTokenStorageIntegrationTest {
 
     @Test
     public void access_token_is_stored() throws Exception {
-        AccessToken token = new AccessToken("12345-token", "token-secret");
-        storage.storeAccessToken(token);
+        long id = 12345L;
+        String token = "12345-token";
+        String secret = "token-secret";
+        AccessToken accessToken = new AccessToken(token, secret);
+        storage.storeAccessToken(accessToken);
 
         DBCursor actual = accessTokensCollection.find();
         assertEquals(1, actual.count());
 
-        DBObject storedToken = actual.next();
-        assertEquals(12345L, storedToken.get("_id"));
-        assertEquals("12345-token", storedToken.get("accessTokenKey"));
-        assertEquals("token-secret", storedToken.get("accessTokenSecret"));
+        verifyTokenInDatabase(actual.next(), id, token, secret);
+    }
+
+    private void verifyTokenInDatabase(DBObject storedToken, long id, String token, String secret) {
+        assertEquals(id, storedToken.get("_id"));
+        assertEquals(token, storedToken.get("accessTokenKey"));
+        assertEquals(secret, storedToken.get("accessTokenSecret"));
     }
 
     @Test
-    public void saving_multiple_times_the_same_access_token_updates_it() throws Exception {
-        AccessToken token1 = new AccessToken("12345-token", "token-secret");
-        AccessToken token2 = new AccessToken("12345-token", "another-secret");
+    public void saving_the_same_access_token_multiple_times_updates_it() throws Exception {
+        long id = 12345L;
+        String token = "12345-token";
+        String secret = "token-secret";
+        String changedSecret = "another-secret";
+        AccessToken token1 = new AccessToken(token, secret);
+        AccessToken token2 = new AccessToken(token, changedSecret);
 
         //store the first token
         storage.storeAccessToken(token1);
@@ -65,9 +75,6 @@ public class AccessTokenStorageIntegrationTest {
         DBCursor actual = accessTokensCollection.find();
         assertEquals(1, actual.count());
 
-        DBObject storedToken = actual.next();
-        assertEquals(12345L, storedToken.get("_id"));
-        assertEquals("12345-token", storedToken.get("accessTokenKey"));
-        assertEquals("another-secret", storedToken.get("accessTokenSecret"));
+        verifyTokenInDatabase(actual.next(), id, token, changedSecret);
     }
 }
