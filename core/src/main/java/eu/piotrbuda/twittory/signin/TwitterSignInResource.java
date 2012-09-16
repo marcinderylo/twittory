@@ -1,5 +1,6 @@
 package eu.piotrbuda.twittory.signin;
 
+import eu.piotrbuda.twittory.storage.AccessTokenStorage;
 import org.springframework.stereotype.Component;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -26,17 +27,23 @@ public class TwitterSignInResource {
     @GET
     @Path("signin")
     public Response signIn(@Context HttpServletRequest request) {
-        String requestUrl = request.getRequestURL().toString();
-        String requestUri = request.getRequestURI();
-        String server = requestUrl.substring(0, requestUrl.indexOf(requestUri));
-        String callback = server + "/api/twitter/callback";
+        String callback = createCallbackUrl(request);
         try {
             RequestToken requestToken = twitter.getOAuthRequestToken(callback);
             request.getSession(true).setAttribute("requestToken", requestToken);
             return Response.status(302).location(URI.create(requestToken.getAuthenticationURL())).build();
-        } catch (TwitterException e) {
-            throw new WebApplicationException(e);
+        } catch (TwitterException te) {
+            throw new WebApplicationException(te);
+        } catch (IllegalStateException ise) {
+            return Response.seeOther(URI.create("../twittory.html")).build();
         }
+    }
+
+    private String createCallbackUrl(HttpServletRequest request) {
+        String requestUrl = request.getRequestURL().toString();
+        String requestUri = request.getRequestURI();
+        String server = requestUrl.substring(0, requestUrl.indexOf(requestUri));
+        return server + "/api/twitter/callback";
     }
 
     @GET
@@ -45,7 +52,7 @@ public class TwitterSignInResource {
                              @QueryParam("oauth_token") String oauth_token,
                              @QueryParam("oauth_verifier") String oauth_verifier) {
         RequestToken requestToken = (RequestToken) request.getSession().getAttribute("requestToken");
-        if(requestToken == null) {
+        if (requestToken == null) {
             throw new WebApplicationException(400);
         }
         try {
@@ -58,6 +65,7 @@ public class TwitterSignInResource {
     }
 
     private void storeAccessToken(AccessToken accessToken) {
+        storage.storeAccessToken(accessToken);
     }
 
 
@@ -66,5 +74,12 @@ public class TwitterSignInResource {
     @Resource
     public void setTwitter(Twitter twitter) {
         this.twitter = twitter;
+    }
+
+    private AccessTokenStorage storage;
+
+    @Resource
+    public void setStorage(AccessTokenStorage storage) {
+        this.storage = storage;
     }
 }
