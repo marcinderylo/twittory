@@ -28,4 +28,8 @@ public class AccessTokenStorage {
         accessTokens.save(object);
     }
 
+    public AccessToken getAccessTokenDetails(String accessTokenKey) {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
 }

@@ -9,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import twitter4j.Twitter;
-import twitter4j.TwitterException;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
 
@@ -17,10 +16,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import java.util.List;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
+import static eu.piotrbuda.utils.ResponseAssertion.assertThatResponse;
 import static org.mockito.Mockito.*;
 
 /**
@@ -45,10 +42,10 @@ public class TwitterSignInResourceTest {
     private String oauth_secret = "secret";
 
     @Mock
-    private HttpServletRequest request = mock(HttpServletRequest.class);
+    private HttpServletRequest request;
 
     @Mock
-    private HttpSession session = mock(HttpSession.class);
+    private HttpSession session;
 
     @Before
     public void setUp() throws Exception {
@@ -69,7 +66,9 @@ public class TwitterSignInResourceTest {
 
     @Test
     public void token_is_obtained() throws Exception {
+        AccessToken accessToken = new AccessToken("1-token", "secret");
         when(session.getAttribute("requestToken")).thenReturn(new RequestToken(oauth_token, oauth_secret));
+        when(twitter.getOAuthAccessToken(any(RequestToken.class), anyString())).thenReturn(accessToken);
 
         resource.callback(request, oauth_token, oauth_verifier);
 
@@ -88,40 +87,12 @@ public class TwitterSignInResourceTest {
     }
 
     @Test
-    public void when_access_token_is_already_available_should_redirect_to_twittory() throws Exception {
-        whenAccessTokenIsAlreadyAvailable();
-        Response response = resource.signIn(request);
-        assertThatResponse(response).isRedirect();
-        assertThatResponse(response).redirectsTo("twittory.html");
-    }
-
-    private void whenAccessTokenIsAlreadyAvailable() throws TwitterException {
-        when(request.getRequestURL()).thenReturn(new StringBuffer("uri"));
-        when(request.getRequestURI()).thenReturn("uri");
-        when(request.getSession(true)).thenReturn(session);
-        //getOAuthRequestToken throws IllegalStateException when access token is already available
-        when(twitter.getOAuthRequestToken(anyString())).thenThrow(IllegalStateException.class);
-    }
-
-    private ResponseAssertion assertThatResponse(Response response) {
-        return new ResponseAssertion(response);
-    }
-
-    private class ResponseAssertion {
-        private Response response;
-
-        public ResponseAssertion(Response response) {
-            this.response = response;
-        }
-
-        public void isRedirect() {
-            assertEquals(Response.Status.SEE_OTHER.getStatusCode(), response.getStatus());
-        }
-
-        public void redirectsTo(String url) {
-            assertTrue(response.getMetadata().containsKey("Location"));
-            List<Object> location = response.getMetadata().get("Location");
-            assertTrue(location.get(0).toString().contains(url));
-        }
+    public void access_token_key_is_stored_in_cookie() throws Exception {
+        String token = "1-token";
+        AccessToken accessToken = new AccessToken(token, "secret");
+        when(session.getAttribute("requestToken")).thenReturn(new RequestToken(oauth_token, oauth_secret));
+        when(twitter.getOAuthAccessToken(any(RequestToken.class), anyString())).thenReturn(accessToken);
+        Response response = resource.callback(request, oauth_token, oauth_verifier);
+        assertThatResponse(response).containsCookie("accesstoken", token);
     }
 }

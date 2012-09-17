@@ -8,12 +8,14 @@ import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
 
 import javax.annotation.Resource;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 
@@ -27,16 +29,32 @@ public class TwitterSignInResource {
     @GET
     @Path("signin")
     public Response signIn(@Context HttpServletRequest request) {
-        String callback = createCallbackUrl(request);
+        for (Cookie cookie : request.getCookies()) {
+            if (cookie.getName().equals("accesstoken")) {
+                AccessToken accessToken = storage.getAccessTokenDetails(cookie.getName());
+                if (accessToken != null) {
+                    return redirectToTwittoryMainPage();
+                }
+            }
+        }
         try {
+            String callback = createCallbackUrl(request);
             RequestToken requestToken = twitter.getOAuthRequestToken(callback);
             request.getSession(true).setAttribute("requestToken", requestToken);
-            return Response.status(302).location(URI.create(requestToken.getAuthenticationURL())).build();
+            return redirectToTwitterForAuthentication(requestToken);
         } catch (TwitterException te) {
             throw new WebApplicationException(te);
         } catch (IllegalStateException ise) {
-            return Response.seeOther(URI.create("../twittory.html")).build();
+            return redirectToTwittoryMainPage();
         }
+    }
+
+    private Response redirectToTwitterForAuthentication(RequestToken requestToken) {
+        return Response.seeOther(URI.create(requestToken.getAuthenticationURL())).build();
+    }
+
+    private Response redirectToTwittoryMainPage() {
+        return Response.seeOther(URI.create("../twittory.html")).build();
     }
 
     private String createCallbackUrl(HttpServletRequest request) {
@@ -58,7 +76,10 @@ public class TwitterSignInResource {
         try {
             AccessToken accessToken = twitter.getOAuthAccessToken(requestToken, oauth_verifier);
             storeAccessToken(accessToken);
-            return Response.seeOther(URI.create("../twittory.html")).build();
+            return Response
+                    .seeOther(URI.create("../twittory.html"))
+                    .cookie(new NewCookie("accesstoken", accessToken.getToken()))
+                    .build();
         } catch (TwitterException e) {
             throw new WebApplicationException(e);
         }
