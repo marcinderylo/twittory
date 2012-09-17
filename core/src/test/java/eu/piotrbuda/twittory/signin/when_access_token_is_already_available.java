@@ -14,10 +14,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.core.Response;
-import java.util.List;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
+import static eu.piotrbuda.utils.ResponseAssertion.assertThatResponse;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -64,28 +62,6 @@ public class when_access_token_is_already_available {
         Response response = resource.signIn(request);
         assertThatResponse(response).isRedirect();
         assertThatResponse(response).redirectsTo("twittory.html");
-    }
-
-    private ResponseAssertion assertThatResponse(Response response) {
-        return new ResponseAssertion(response);
-    }
-
-    private class ResponseAssertion {
-        private Response response;
-
-        public ResponseAssertion(Response response) {
-            this.response = response;
-        }
-
-        public void isRedirect() {
-            assertEquals(Response.Status.SEE_OTHER.getStatusCode(), response.getStatus());
-        }
-
-        public void redirectsTo(String url) {
-            assertTrue(response.getMetadata().containsKey("Location"));
-            List<Object> location = response.getMetadata().get("Location");
-            assertTrue(location.get(0).toString().contains(url));
-        }
     }
 
 }
