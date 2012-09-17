@@ -31,7 +31,10 @@ public class TwitterSignInResource {
     public Response signIn(@Context HttpServletRequest request) {
         for (Cookie cookie : request.getCookies()) {
             if (cookie.getName().equals("accesstoken")) {
-                return redirectToTwittoryMainPage();
+                AccessToken accessToken = storage.getAccessTokenDetails(cookie.getName());
+                if (accessToken != null) {
+                    return redirectToTwittoryMainPage();
+                }
             }
         }
         try {
@@ -47,7 +50,7 @@ public class TwitterSignInResource {
     }
 
     private Response redirectToTwitterForAuthentication(RequestToken requestToken) {
-        return Response.status(302).location(URI.create(requestToken.getAuthenticationURL())).build();
+        return Response.seeOther(URI.create(requestToken.getAuthenticationURL())).build();
     }
 
     private Response redirectToTwittoryMainPage() {
