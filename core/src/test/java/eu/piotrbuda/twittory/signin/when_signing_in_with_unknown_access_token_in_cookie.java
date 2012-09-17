@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class when_signing_in_with_unknown_access_token_in_cookie {
     @InjectMocks
+    @SuppressWarnings("unused")
     private TwitterSignInResource resource;
 
     @Mock

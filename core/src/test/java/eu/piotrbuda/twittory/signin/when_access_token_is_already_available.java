@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 public class when_access_token_is_already_available {
 
     @InjectMocks
+    @SuppressWarnings("unused")
     private TwitterSignInResource resource;
 
     @Mock
