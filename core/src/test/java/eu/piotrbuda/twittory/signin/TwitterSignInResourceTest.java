@@ -15,8 +15,9 @@ import twitter4j.auth.RequestToken;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
-import static org.junit.Assert.fail;
+import static eu.piotrbuda.utils.ResponseAssertion.assertThatResponse;
 import static org.mockito.Mockito.*;
 
 /**
@@ -41,10 +42,10 @@ public class TwitterSignInResourceTest {
     private String oauth_secret = "secret";
 
     @Mock
-    private HttpServletRequest request = mock(HttpServletRequest.class);
+    private HttpServletRequest request;
 
     @Mock
-    private HttpSession session = mock(HttpSession.class);
+    private HttpSession session;
 
     @Before
     public void setUp() throws Exception {
@@ -87,6 +88,11 @@ public class TwitterSignInResourceTest {
 
     @Test
     public void access_token_key_is_stored_in_cookie() throws Exception {
-        fail("Pending...");
+        String token = "1-token";
+        AccessToken accessToken = new AccessToken(token, "secret");
+        when(session.getAttribute("requestToken")).thenReturn(new RequestToken(oauth_token, oauth_secret));
+        when(twitter.getOAuthAccessToken(any(RequestToken.class), anyString())).thenReturn(accessToken);
+        Response response = resource.callback(request, oauth_token, oauth_verifier);
+        assertThatResponse(response).containsCookie("accesstoken", token);
     }
 }
