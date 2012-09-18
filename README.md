@@ -16,6 +16,8 @@ To run integration tests an instance of MongoDB on localhost:27017 must be prese
 
 License
 =======
+Twittory is licensed under the BSD 3-clause license.
+
     Copyright (c) 2012, Piotr Buda
     All rights reserved.
 
