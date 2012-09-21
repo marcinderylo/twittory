@@ -1,11 +1,10 @@
 package eu.piotrbuda.twittory.core;
 
+import org.apache.commons.lang3.Validate;
 import twitter4j.Status;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * .
@@ -27,7 +26,7 @@ public class LinkExtractor {
      * @return empty string if there is no link in status or string representing an url if one is present
      */
     public String extractLinkFrom(Status status) {
-        checkNotNull(status, "Status cannot be null");
+        Validate.notNull(status, "Status cannot be null");
         String text = status.getText();
         String url = matchPattern(SCHEMA_PATTERN, text);
         if (url.equals("")) {
