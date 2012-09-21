@@ -29,24 +29,48 @@ public class TwitterSignInResource {
     @GET
     @Path("signin")
     public Response signIn(@Context HttpServletRequest request) {
-        for (Cookie cookie : request.getCookies()) {
-            if (cookie.getName().equals("accesstoken")) {
-                AccessToken accessToken = storage.getAccessTokenDetails(cookie.getName());
-                if (accessToken != null) {
-                    return redirectToTwittoryMainPage();
-                }
-            }
+        if (accessTokenIsInCookieAlready(request)) {
+            return redirectToTwittoryMainPage();
         }
         try {
-            String callback = createCallbackUrl(request);
-            RequestToken requestToken = twitter.getOAuthRequestToken(callback);
-            request.getSession(true).setAttribute("requestToken", requestToken);
+            RequestToken requestToken = obtainTwitterRequestToken(request);
+            storeRequestTokenInSession(request, requestToken);
             return redirectToTwitterForAuthentication(requestToken);
         } catch (TwitterException te) {
             throw new WebApplicationException(te);
         } catch (IllegalStateException ise) {
             return redirectToTwittoryMainPage();
         }
+    }
+
+    private boolean accessTokenIsInCookieAlready(HttpServletRequest request) {
+        for (Cookie cookie : request.getCookies()) {
+            if (cookie.getName().equals("accesstoken")) {
+                AccessToken accessToken = storage.getAccessTokenDetails(cookie.getName());
+                if (accessToken != null) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * .
+     *
+     * @param request
+     * @return
+     * @throws TwitterException
+     * @throws IllegalStateException this exception is thrown by Twitter4J if instead of
+     *                               request token an access token is retrieved
+     */
+    private RequestToken obtainTwitterRequestToken(HttpServletRequest request) throws TwitterException, IllegalStateException {
+        String callback = createCallbackUrl(request);
+        return twitter.getOAuthRequestToken(callback);
+    }
+
+    private void storeRequestTokenInSession(HttpServletRequest request, RequestToken requestToken) {
+        request.getSession(true).setAttribute("requestToken", requestToken);
     }
 
     private Response redirectToTwitterForAuthentication(RequestToken requestToken) {
