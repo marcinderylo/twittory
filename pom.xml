@@ -51,11 +51,6 @@
         <developerConnection>scm:git:git@github.com:pbuda/twittory.git</developerConnection>
     </scm>
 
-    <modules>
-        <module>core</module>
-        <module>integration-tests</module>
-        <module>webapp</module>
-    </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -110,5 +105,26 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>core</module>
+                <module>integration-tests</module>
+                <module>webapp</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>dev</id>
+            <modules>
+                <module>core</module>
+                <module>webapp</module>
+            </modules>
+        </profile>
+    </profiles>
 
 </project>
