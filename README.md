@@ -14,6 +14,8 @@ Furthermore, Twittory uses MongoDB as it's storage.
 
 To run integration tests an instance of MongoDB on localhost:27017 must be present.
 
+Project is being built on Travis-CI.
+
 License
 =======
 Twittory is licensed under the BSD 3-clause license.
