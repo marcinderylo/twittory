@@ -120,6 +120,12 @@
         </profile>
         <profile>
             <id>dev</id>
+            <activation>
+                <property>
+                    <name>TRAVIS</name>
+                    <value>true</value>
+                </property>
+            </activation>
             <modules>
                 <module>core</module>
                 <module>webapp</module>
