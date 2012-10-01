@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import twitter4j.Twitter;
+import twitter4j.TwitterException;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
 
@@ -18,6 +19,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 import static eu.piotrbuda.utils.ResponseAssertion.assertThatResponse;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 /**
@@ -26,6 +28,9 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class TwitterSignInResourceTest {
 
+    public static final String OAUTH_TOKEN = "token";
+    public static final String OAUTH_VERIFIER = "verifier";
+    public static final String OAUTH_SECRET = "secret";
     @InjectMocks
     private TwitterSignInResource resource;
 
@@ -35,12 +40,6 @@ public class TwitterSignInResourceTest {
     @Mock
     private AccessTokenStorage storage;
 
-    private String oauth_token = "token";
-
-    private String oauth_verifier = "verifier";
-
-    private String oauth_secret = "secret";
-
     @Mock
     private HttpServletRequest request;
 
@@ -49,7 +48,7 @@ public class TwitterSignInResourceTest {
 
     @Before
     public void setUp() throws Exception {
-        when(request.getSession()).thenReturn(session);
+        when(request.getSession()).thenReturn(session); // mocks returning mocks... no good...
     }
 
     @After
@@ -59,40 +58,61 @@ public class TwitterSignInResourceTest {
 
     @Test(expected = WebApplicationException.class)
     public void it_is_impossible_to_call_callback_without_request_token() throws Exception {
-        when(session.getAttribute("requestToken")).thenReturn(null);
-
+        // given
+        withoutRequestTokenInSession();
+        // when
         resource.callback(request, "", "");
+        // then
+        expectExceptionToBeThrown();
     }
 
     @Test
     public void token_is_obtained() throws Exception {
-        AccessToken accessToken = new AccessToken("1-token", "secret");
-        when(session.getAttribute("requestToken")).thenReturn(new RequestToken(oauth_token, oauth_secret));
-        when(twitter.getOAuthAccessToken(any(RequestToken.class), anyString())).thenReturn(accessToken);
-
-        resource.callback(request, oauth_token, oauth_verifier);
-
+        // given
+        withRequestTokenInSession(new RequestToken(OAUTH_TOKEN, OAUTH_SECRET));
+        whenTwitterReturnsAccessToken(new AccessToken("1-token", "secret"));
+        // when
+        resource.callback(request, OAUTH_TOKEN, OAUTH_VERIFIER);
+        // then
         verify(twitter).getOAuthAccessToken(any(RequestToken.class), anyString());
     }
 
     @Test
     public void access_token_is_stored_upon_retrieval() throws Exception {
-        AccessToken accessToken = new AccessToken("1-token", "secret");
-        when(session.getAttribute("requestToken")).thenReturn(new RequestToken(oauth_token, oauth_secret));
-        when(twitter.getOAuthAccessToken(any(RequestToken.class), anyString())).thenReturn(accessToken);
-
-        resource.callback(request, oauth_token, oauth_verifier);
-
-        verify(storage).storeAccessToken(accessToken);
+        // given
+        withRequestTokenInSession(new RequestToken(OAUTH_TOKEN, OAUTH_SECRET));
+        whenTwitterReturnsAccessToken(new AccessToken("1-token", "secret"));
+        // when
+        resource.callback(request, OAUTH_TOKEN, OAUTH_VERIFIER);
+        // then
+        verify(storage).storeAccessToken(new AccessToken("1-token", "secret"));
     }
 
     @Test
     public void access_token_key_is_stored_in_cookie() throws Exception {
+        // given
         String token = "1-token";
-        AccessToken accessToken = new AccessToken(token, "secret");
-        when(session.getAttribute("requestToken")).thenReturn(new RequestToken(oauth_token, oauth_secret));
-        when(twitter.getOAuthAccessToken(any(RequestToken.class), anyString())).thenReturn(accessToken);
-        Response response = resource.callback(request, oauth_token, oauth_verifier);
+        withRequestTokenInSession(new RequestToken(OAUTH_TOKEN, OAUTH_SECRET));
+        whenTwitterReturnsAccessToken(new AccessToken(token, "secret"));
+        // when
+        Response response = resource.callback(request, OAUTH_TOKEN, OAUTH_VERIFIER);
+        // then
         assertThatResponse(response).containsCookie("accesstoken", token);
+    }
+
+    private void withoutRequestTokenInSession() {
+        withRequestTokenInSession(null);
+    }
+
+    private void withRequestTokenInSession(RequestToken requestToken) {
+        when(session.getAttribute("requestToken")).thenReturn(requestToken);
+    }
+
+    private void whenTwitterReturnsAccessToken(AccessToken secret) throws TwitterException {
+        when(twitter.getOAuthAccessToken(any(RequestToken.class), anyString())).thenReturn(secret);
+    }
+
+    private void expectExceptionToBeThrown() {
+        fail("exception should have been thrown");
     }
 }
