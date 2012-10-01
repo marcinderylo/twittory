@@ -67,17 +67,6 @@ public class TwitterSignInResourceTest {
     }
 
     @Test
-    public void token_is_obtained() throws Exception {
-        // given
-        withRequestTokenInSession(new RequestToken(OAUTH_TOKEN, OAUTH_SECRET));
-        whenTwitterReturnsAccessToken(new AccessToken("1-token", "secret"));
-        // when
-        resource.callback(request, OAUTH_TOKEN, OAUTH_VERIFIER);
-        // then
-        verify(twitter).getOAuthAccessToken(any(RequestToken.class), anyString());
-    }
-
-    @Test
     public void access_token_is_stored_upon_retrieval() throws Exception {
         // given
         withRequestTokenInSession(new RequestToken(OAUTH_TOKEN, OAUTH_SECRET));
